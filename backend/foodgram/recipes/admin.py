@@ -23,20 +23,43 @@ class IngredientAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
-@admin.register(Recipe)
+class RecipeIngredientInline(admin.TabularInline):
+    model = RecipeIngredient
+    extra = 1
+
+
+class RecipeTagInline(admin.TabularInline):
+    model = Recipe.tags.through
+    verbose_name = 'fjlsjfs'
+
+
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = (
-        'id', 'author', 'name',
-        'image', 'text', 'cooking_time',
-    )
+    inlines = (RecipeIngredientInline, RecipeTagInline)
+    exclude = ('tags',)
 
-
-@admin.register(RecipeIngredient)
-class IngredientInRecipeAdmin(admin.ModelAdmin):
     list_display = (
-        'id', 'ingredient', 'amount', 'recipe'
+        'id', 'author', 'name', 'count_favorites', 'ingredients_list'
     )
+    list_filter = ('author', 'tags', 'ingredients')
     search_fields = ('name',)
+
+    def count_favorites(self, obj):
+        from django.db.models import Count
+        result = Favorite.objects.filter(
+            recipe=obj
+        ).aggregate(count=Count('user'))
+        return result['count']
+
+    count_favorites.short_description = 'Кол-во добавлений в избранное'
+
+    def ingredients_list(self, obj):
+        ingredients = RecipeIngredient.objects.filter(recipe=obj)
+        return [str(ingredient) for ingredient in ingredients]
+
+    ingredients_list.short_description = 'Ингредиенты'
+
+
+admin.site.register(Recipe, RecipeAdmin)
 
 
 @admin.register(Subscription)

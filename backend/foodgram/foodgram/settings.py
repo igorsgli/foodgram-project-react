@@ -117,12 +117,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 5,
-}
-
-DJOSER = {
-    'SEND_ACTIVATION_EMAIL': False,
-    'LOGIN_FIELD': 'email'
+    'PAGE_SIZE': 6,
 }
 
 DJOSER = {
@@ -140,8 +135,14 @@ DJOSER = {
 }
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = (os.path.join(BASE_DIR, 'api', 'static/'),)
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'api', 'media')
 
 AUTH_USER_MODEL = 'users.CustomUser'
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LENGTH_USERNAME = 150
 LENGTH_EMAIL = 254
@@ -156,4 +157,4 @@ LENGTH_RECIPE_NAME = 200
 USERNAME_PATTERN = r"^[\w.@+-]+\Z"
 SLUG_PATTERN = "^[-a-zA-Z0-9_]+"
 
-DEFAULT_RECIPES_LIMIT = 5
+DEFAULT_RECIPES_LIMIT = 3
