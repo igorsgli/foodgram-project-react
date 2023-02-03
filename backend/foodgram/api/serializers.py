@@ -13,12 +13,12 @@ from recipes.models import (
     Subscription,
     Tag
 )
-from users.models import User
+from users.models import CustomUser
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
     class Meta:
-        model = User
+        model = CustomUser
         fields = (
             'email',
             'username',
@@ -39,7 +39,7 @@ class CustomUserSerializer(UserSerializer):
         )
 
     class Meta:
-        model = User
+        model = CustomUser
         fields = (
             'email',
             'id',
@@ -76,7 +76,7 @@ class UserSubscriptionsSerializer(CustomUserSerializer):
         return obj.recipes.count()
 
     class Meta:
-        model = User
+        model = CustomUser
         fields = (
             'email',
             'id',
@@ -126,10 +126,10 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(
         source='ingredient.id'
     )
-    name = serializers.StringRelatedField(
+    name = serializers.ReadOnlyField(
         source='ingredient.name'
     )
-    measurement_unit = serializers.StringRelatedField(
+    measurement_unit = serializers.ReadOnlyField(
         source='ingredient.measurement_unit'
     )
 
@@ -173,18 +173,14 @@ class RecipeListSerializer(serializers.ModelSerializer):
     def get_is_favorited(self, obj):
         request = self.context.get('request')
         return (
-            Favorite.objects.filter(
-                user=request.user, recipe=obj
-            ).exists()
+            obj.favorites.filter(user=request.user).exists()
             and request.user.is_authenticated
         )
 
     def get_is_in_shopping_cart(self, obj):
         request = self.context.get('request')
         return (
-            ShoppingCart.objects.filter(
-                user=request.user, recipe=obj
-            ).exists()
+            obj.shoppingcarts.filter(user=request.user).exists()
             and request.user.is_authenticated
         )
 
@@ -209,12 +205,6 @@ class IngredientCreateInRecipeSerializer(serializers.ModelSerializer):
             'id',
             'amount'
         )
-        # validators = [
-        #     UniqueTogetherValidator(
-        #         queryset=RecipeIngredient.objects.all(),
-        #         fields=('id', 'amount')
-        #     )
-        # ]
 
     def validate_amount(self, value):
         if value < 1:
@@ -256,13 +246,12 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
 
         ingredients = self.context.get('request').data['ingredients']
         id_items = []
-        id_items = [ingredient['id'] for ingredient in ingredients]
-        for id_item in id_items:
-            if id_items.count(id_item) >= 2:
+        for ingredient in ingredients:
+            if ingredient['id'] in id_items:
                 raise serializers.ValidationError(
                     'Ингредиенты в рецепте не должны повторяться.'
                 )
-
+            id_items.append(ingredient['id'])
         return value
 
     def validate_tags(self, value):
@@ -272,12 +261,13 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
             )
 
         tags = self.context.get('request').data['tags']
+        tag_items = []
         for tag in tags:
-            if tags.count(tag) >= 2:
+            if tag in tag_items:
                 raise serializers.ValidationError(
                     'Тэги в рецепте не должны повторяться.'
                 )
-
+            tag_items.append(tag)
         return value
 
     def validate_cooking_time(self, value):
@@ -288,15 +278,15 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         return value
 
     @staticmethod
-    def bulk_recipe_ingredient(ingredients, recipe):
-        return [
+    def bulk_create(ingredients, recipe):
+        return RecipeIngredient.objects.bulk_create([
             RecipeIngredient(
                 recipe=recipe,
                 ingredient=ingredient['id'],
                 amount=ingredient['amount']
             )
             for ingredient in ingredients
-        ]
+        ])
 
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
@@ -304,47 +294,19 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         recipe = Recipe.objects.create(author=request.user, **validated_data)
         recipe.tags.set(tags)
-        RecipeIngredient.objects.bulk_create(
-            self.bulk_recipe_ingredient(ingredients, recipe)
-        )
+        self.bulk_create(ingredients, recipe)
         return recipe
 
     def update(self, instance, validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
-        instance.name = validated_data.get('name', instance.name)
-        instance.image = validated_data.get('image', instance.image)
-        instance.text = validated_data.get('text', instance.text)
-        instance.cooking_time = validated_data.get(
-            'cooking_time', instance.cooking_time
-        )
         instance.tags.set(tags)
         RecipeIngredient.objects.filter(recipe=instance.pk).delete()
-        RecipeIngredient.objects.bulk_create(
-            self.bulk_recipe_ingredient(ingredients, instance)
-        )
+        self.bulk_create(ingredients, instance)
         return super().update(instance, validated_data)
 
     def to_representation(self, instance):
-        request = self.context.get('request')
-        representation = super().to_representation(instance)
-        representation['ingredients'] = RecipeIngredientSerializer(
-            RecipeIngredient.objects.filter(recipe=instance),
-            many=True
-        ).data
-        representation['tags'] = TagSerializer(
-            Tag.objects.filter(recipe=instance),
-            many=True
-        ).data
-        representation['is_favorited'] = Favorite.objects.filter(
-            user=request.user,
-            recipe=instance
-        ).exists()
-        representation['is_in_shopping_cart'] = ShoppingCart.objects.filter(
-            user=request.user,
-            recipe=instance
-        ).exists()
-        return representation
+        return RecipeListSerializer(instance, context=self.context).data
 
 
 class FavoriteSerializer(serializers.ModelSerializer):

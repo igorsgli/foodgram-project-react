@@ -8,9 +8,9 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-
-from .permissions import IsAuthor
-from .serializers import (
+from api.filters import RecipeFilter
+from api.permissions import IsAuthor
+from api.serializers import (
     FavoriteSerializer,
     IngredientSerializer,
     TagSerializer,
@@ -30,7 +30,7 @@ from recipes.models import (
     Subscription,
     Tag,
 )
-from users.models import User
+from users.models import CustomUser
 
 
 class CustomUserViewSet(UserViewSet):
@@ -60,7 +60,7 @@ class CustomUserViewSet(UserViewSet):
 
     @action(methods=['get'], detail=False)
     def subscriptions(self, request):
-        queryset = User.objects.filter(
+        queryset = CustomUser.objects.filter(
             subscribed_by__user=self.request.user
         ).all()
         context = self.get_serializer_context()
@@ -90,8 +90,12 @@ class CustomUserViewSet(UserViewSet):
                 serializer(instance=author, context=context).data,
                 status=status.HTTP_201_CREATED
             )
-        instance = get_object_or_404(Subscription, author=id)
-        instance.delete()
+        get_object_or_404(
+            Subscription.objects.filter(
+                author=id
+            ).filter(
+                user=self.request.user.id
+            )).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -115,6 +119,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
+    filter_class = RecipeFilter
 
     http_method_names = ['get', 'post', 'patch', 'delete']
 
@@ -139,36 +144,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return RecipeListSerializer
 
     @staticmethod
-    def filter(request, queryset):
-        author = request.query_params.get('author')
-        if author is not None:
-            return queryset.filter(author=author)
-
-        tags = request.query_params.getlist('tags')
-        if tags:
-            return queryset.filter(tags__slug__in=tags).distinct()
-
-        is_favorited = request.query_params.get('is_favorited')
-        if is_favorited in ('0', '1'):
-            if is_favorited == '1':
-                return queryset.filter(favorites__user=request.user)
-            return queryset.exclude(favorites__user=request.user)
-
-        is_in_shopping_cart = request.query_params.get(
-            'is_in_shopping_cart'
-        )
-        if is_in_shopping_cart in ('0', '1'):
-            if is_in_shopping_cart == '1':
-                return queryset.filter(shoppingcarts__user=request.user)
-            return queryset.exclude(shoppingcarts__user=request.user)
-
-        return queryset
-
-    def get_queryset(self):
-        queryset = Recipe.objects.all()
-        return self.filter(self.request, queryset)
-
-    @staticmethod
     def create_object(serializer, request, pk):
         recipe = get_object_or_404(Recipe, pk=pk)
         kwargs = {
@@ -184,8 +159,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         )
 
     @staticmethod
-    def delete_object(model, pk):
-        get_object_or_404(model, recipe=pk).delete()
+    def delete_object(model, request, pk):
+        get_object_or_404(
+            model.objects.filter(
+                recipe=pk
+            ).filter(
+                user=request.user
+            )).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['post'], detail=True)
@@ -194,7 +174,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @favorite.mapping.delete
     def delete_favorite(self, request, pk=None):
-        return self.delete_object(Favorite, pk)
+        return self.delete_object(Favorite, request, pk)
 
     @action(methods=['post'], detail=True)
     def shopping_cart(self, request, pk=None):
@@ -202,7 +182,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @shopping_cart.mapping.delete
     def delete_shopping_cart(self, request, pk=None):
-        return self.delete_object(ShoppingCart, pk)
+        return self.delete_object(ShoppingCart, request, pk)
 
     @staticmethod
     def save_file(items):
@@ -221,7 +201,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         items = RecipeIngredient.objects.select_related(
             'recipe', 'ingredient'
         ).filter(
-            recipe__shoppingcarts__user=request.user
+            recipe__shoppingcart__user=request.user
         ).values(
             'ingredient__name', 'ingredient__measurement_unit'
         ).annotate(

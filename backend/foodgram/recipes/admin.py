@@ -17,20 +17,21 @@ class TagsAdmin(admin.ModelAdmin):
     list_editable = ('name', 'color', 'slug',)
 
 
+class RecipeIngredientInline(admin.TabularInline):
+    model = RecipeIngredient
+    min_num = 1
+    extra = 1
+
+
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'measurement_unit',)
     search_fields = ('name',)
 
 
-class RecipeIngredientInline(admin.TabularInline):
-    model = RecipeIngredient
-    extra = 1
-
-
 class RecipeTagInline(admin.TabularInline):
     model = Recipe.tags.through
-    verbose_name = 'fjlsjfs'
+    min_num = 1
 
 
 class RecipeAdmin(admin.ModelAdmin):
@@ -44,17 +45,12 @@ class RecipeAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
     def count_favorites(self, obj):
-        from django.db.models import Count
-        result = Favorite.objects.filter(
-            recipe=obj
-        ).aggregate(count=Count('user'))
-        return result['count']
+        return obj.favorites.count()
 
     count_favorites.short_description = 'Кол-во добавлений в избранное'
 
     def ingredients_list(self, obj):
-        ingredients = RecipeIngredient.objects.filter(recipe=obj)
-        return [str(ingredient) for ingredient in ingredients]
+        return [str(ingredient) for ingredient in obj.ingredients.all()]
 
     ingredients_list.short_description = 'Ингредиенты'
 
