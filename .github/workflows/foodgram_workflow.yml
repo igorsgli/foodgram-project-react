@@ -44,12 +44,12 @@ jobs:
           context: frontend/
           push: true
           tags: igorsgli/foodgram_frontend
-      # - name: Push foodgram_django to Docker Hub
-      #   uses: docker/build-push-action@v2 
-      #   with:
-      #     context: backend/
-      #     push: true
-      #     tags: igorsgli/foodgram_django
+      - name: Push foodgram_django to Docker Hub
+        uses: docker/build-push-action@v2 
+        with:
+          context: backend/
+          push: true
+          tags: igorsgli/foodgram_django
 
   # build_and_push_to_docker_hub:
   #   name: Push Docker image to Docker Hub
