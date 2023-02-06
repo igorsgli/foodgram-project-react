@@ -7,7 +7,6 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-
 from api.filters import IngredientFilter, RecipeFilter
 from api.permissions import IsAuthor
 from api.serializers import (
