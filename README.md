@@ -1,6 +1,7 @@
 ![example workflow](https://github.com/igorsgli/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)
 
 server_name (IP or domain name): 158.160.59.12
+Адрес сайта:
 ```
 http://158.160.59.12/
 ```
@@ -9,9 +10,8 @@ http://158.160.59.12/
 
 Описание проекта:
 
-```
 Проект **Foodgram** - онлайн-сервис «Продуктовый помощник». На этом сервисе пользователи смогут публиковать рецепты, подписываться на публикации других пользователей, добавлять понравившиеся рецепты в список «Избранное», а перед походом в магазин скачивать сводный список продуктов, необходимых для приготовления одного или нескольких выбранных блюд.
-```
+
 
 Стек:
 
@@ -19,20 +19,38 @@ http://158.160.59.12/
 Python, Django, Django REST framework, PostgreSQL, Gunicorn, Nginx, Docker, Docker Hub
 ```
 
-Скопируйте файлы docker-compose.yaml и nginx.conf из папки проекта infra на сервер:
+Скопируйте файлы docker-compose.yaml, nginx.conf и папку docs из папки проекта infra на сервер:
 
 ```
-scp -r ~/Dev/yamdb_final/infra/docker-compose.yaml backend@62.84.124.124:~/
+scp -r ~/Dev/foodgram-project-react/infra/docker-compose.yml igor@158.160.59.12:~/
 ```
 
 ```
-scp -r ~/Dev/yamdb_final/infra/nginx backend@62.84.124.124:~/
+scp -r ~/Dev/foodgram-project-react/infra/nginx.conf igor@158.160.59.12:~/
 ```
 
-Создайте и настройте файл переменных окружения .env на сервере:
+```
+scp -r ~/Dev/foodgram-project-react/infra/docs igor@158.160.59.12:~/
+```
+
+Файл переменных окружения .env на сервере создается скриптом в foodgram_workflow.yml:
 
 ```
-touch .env
+jobs:
+...
+    deploy:
+    ...
+        touch .env
+        echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env  # Secrets ключ на GITHUB Actions
+        echo DEBUG=False >> .env
+        echo DB_SQLITE=False >> .env
+        echo HOST=${{ secrets.HOST }} >> .env  # Secrets ключ на GITHUB Actions
+        echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env  # Secrets ключ на GITHUB Actions
+        echo DB_NAME=${{ secrets.DB_NAME }} >> .env  # Secrets ключ на GITHUB Actions
+        echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env  # Secrets ключ на GITHUB Actions
+        echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env  # Secrets ключ на GITHUB Actions
+        echo DB_HOST=${{ secrets.DB_HOST }} >> .env  # Secrets ключ на GITHUB Actions
+        echo DB_PORT=${{ secrets.DB_PORT }} >> .env  # Secrets ключ на GITHUB Actions
 ```
 
 Шаблон наполнения env-файла:
@@ -50,7 +68,7 @@ DB_SQLITE=False # выбор базы данных (если True - sqlite3, и�
 ```
 
 ```
-HOST='62.84.124.124' # IP адрес сервера
+HOST='158.160.59.12' # IP адрес сервера
 ```
 
 ```
@@ -91,27 +109,38 @@ git commit -m 'комментарий'
 git push
 ```
 
-Выполните миграции:
+После развертывания приложения на сервере:
+
+Создайте миграции:
 
 ```
-docker-compose exec web python manage.py migrate
+docker-compose exec django python manage.py makemigrations
+```
+
+```
+docker-compose exec django python manage.py migrate
 ```
 
 Создайте суперпользователя:
 
 ```
-docker-compose exec web python manage.py createsuperuser
+docker-compose exec django python manage.py createsuperuser
 ```
 
 Настройте сбор статики:
 
 ```
-docker-compose exec web python manage.py collectstatic --no-input
+docker-compose exec django python manage.py collectstatic --no-input
 ```
 
-Для заполнения базы данных ознакомьтесь с документацией приложения:
+Загрузите данные в базу для таблиц Ингредиенты и Теги:
 
 ```
-http://62.84.124.124/redoc/
+docker-compose exec django python manage.py load
 ```
 
+Для дальнейшей работы с сайтом ознакомьтесь с документацией приложения:
+
+```
+http://158.160.59.12/api/docs/
+```
