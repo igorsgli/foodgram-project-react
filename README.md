@@ -19,7 +19,7 @@ http://158.160.59.12/
 Python, Django, Django REST framework, PostgreSQL, Gunicorn, Nginx, Docker, Docker Hub
 ```
 
-Скопируйте файлы docker-compose.yaml и nginx/default.conf из папки проекта infra на сервер:
+Скопируйте файлы docker-compose.yaml и nginx.conf из папки проекта infra на сервер:
 
 ```
 scp -r ~/Dev/yamdb_final/infra/docker-compose.yaml backend@62.84.124.124:~/
