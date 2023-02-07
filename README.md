@@ -1,6 +1,7 @@
 ![example workflow](https://github.com/igorsgli/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)
 
 server_name (IP or domain name): 158.160.59.12
+
 Адрес сайта:
 ```
 http://158.160.59.12/
@@ -19,7 +20,7 @@ http://158.160.59.12/
 Python, Django, Django REST framework, PostgreSQL, Gunicorn, Nginx, Docker, Docker Hub
 ```
 
-Скопируйте файлы docker-compose.yaml, nginx.conf и папку docs из папки проекта infra на сервер:
+Скопируйте файлы docker-compose.yml, nginx.conf и папку docs из папки проекта infra на сервер:
 
 ```
 scp -r ~/Dev/foodgram-project-react/infra/docker-compose.yml igor@158.160.59.12:~/
