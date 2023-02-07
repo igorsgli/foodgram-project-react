@@ -66,7 +66,7 @@ jobs:
           script: |
             sudo docker pull igorsgli/api_yamdb
             sudo docker-compose stop
-            sudo docker-compose rm web
+            sudo docker-compose rm django
             touch .env
             echo HOST=${{ secrets.HOST }} >> .env
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
