@@ -2,6 +2,10 @@ from django_filters import rest_framework as filters
 from recipes.models import Ingredient, Recipe
 
 
+class IngredientSearchFilter(filters.SearchFilter):
+    search_param = 'name'
+
+
 class IngredientFilter(filters.FilterSet):
     name = filters.AllValuesMultipleFilter('name', lookup_expr='icontains')
 

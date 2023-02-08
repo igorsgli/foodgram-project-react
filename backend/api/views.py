@@ -7,7 +7,7 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from api.filters import IngredientFilter, RecipeFilter
+from api.filters import IngredientFilter, IngredientSearchFilter, RecipeFilter
 from api.permissions import IsAuthor
 from api.serializers import (
     FavoriteSerializer,
@@ -108,6 +108,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = IngredientSerializer
     pagination_class = None
     filter_class = IngredientFilter
+    filter_backends = [IngredientSearchFilter]
 
     def get_queryset(self):
         name = self.request.query_params.get('name')
@@ -191,13 +192,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ])
         filename = 'shopping_cart.txt'
         response = HttpResponse(text, content_type='text/plain')
-        print(f'attachment; filename={filename}')
         response['Content-Disposition'] = f'attachment; filename={filename}'
         return response
 
     @action(methods=['get'], detail=False)
     def download_shopping_cart(self, request):
-        print('!!!!!!!!!!!!!!!!!!!!hello!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
         items = RecipeIngredient.objects.select_related(
             'recipe', 'ingredient'
         ).filter(
@@ -207,5 +206,4 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ).annotate(
             total=Sum('amount')
         ).order_by('ingredient__name')
-        print('items=', items)
         return self.save_file(items)
