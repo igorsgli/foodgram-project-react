@@ -134,7 +134,7 @@ docker-compose exec django python manage.py createsuperuser
 docker-compose exec django python manage.py collectstatic --no-input
 ```
 
-Загрузите данные в базу для таблиц Ингредиенты и Теги:
+Загрузите данные в базу для таблиц Ингредиенты и Теги: 
 
 ```
 docker-compose exec django python manage.py load
