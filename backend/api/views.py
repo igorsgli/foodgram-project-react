@@ -197,7 +197,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(methods=['get'], detail=False)
     def download_shopping_cart(self, request):
-        print('!!!!!!!!!!!!!!!!!!!!hello!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+        print('!!!!!!!!!!!!!!!!!!!!hello!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
         items = RecipeIngredient.objects.select_related(
             'recipe', 'ingredient'
         ).filter(
