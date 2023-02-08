@@ -1,6 +1,6 @@
 ![example workflow](https://github.com/igorsgli/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)
 
-server_name (IP or domain name): 158.160.59.12
+server_name (IP or domain name): 158.160.54.226
 
 Адрес сайта:
 ```

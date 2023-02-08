@@ -78,7 +78,7 @@ class CustomUserViewSet(UserViewSet):
             'user': self.request.user.id,
             'author': author.id
         }
-        if self.request.method == 'POST':
+        if self.request.method ==    'POST':
             subscription_serializer = SubscriptionSerializer(data=kwargs)
             subscription_serializer.is_valid(raise_exception=True)
             subscription_serializer.save()
@@ -191,7 +191,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ])
         filename = 'shoping_cart.txt'
         response = HttpResponse(text, content_type='text/plain')
-        response['Content-Disposition'] = f'attachment; filename={filename}'
+        response['Content-Disposition'] = f'attachment; filename={filename}' % filename
         return response
 
     @action(methods=['get'], detail=False)
