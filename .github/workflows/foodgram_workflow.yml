@@ -69,7 +69,7 @@ jobs:
             sudo docker-compose rm django
             touch .env
             echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
-            echo DEBUG=False >> .env
+            echo DEBUG=True >> .env
             echo DB_SQLITE=False >> .env
             echo HOST=${{ secrets.HOST }} >> .env
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
