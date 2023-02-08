@@ -1,8 +1,9 @@
 from django_filters import rest_framework as filters
 from recipes.models import Ingredient, Recipe
+from rest_framework.filters import SearchFilter
 
 
-class IngredientSearchFilter(filters.SearchFilter):
+class IngredientSearchFilter(SearchFilter):
     search_param = 'name'
 
 
