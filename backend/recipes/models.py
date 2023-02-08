@@ -195,7 +195,8 @@ class Favorite(Common):
         default_related_name = 'favorites'
         constraints = [
             models.UniqueConstraint(
-                name='unique_favorite_user_recipe'
+                name='unique_favorite_user_recipe',
+                name=None
             )
         ]
         verbose_name = 'Избранное'
