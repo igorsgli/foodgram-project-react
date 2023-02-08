@@ -64,9 +64,10 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
-            sudo docker pull igorsgli/api_yamdb
+            sudo docker pull igorsgli/foodgram_frontend
+            sudo docker pull igorsgli/foodgram_django
             sudo docker-compose stop
-            sudo docker-compose rm django
+            sudo docker-compose rm django -f
             touch .env
             echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
             echo DEBUG=True >> .env
