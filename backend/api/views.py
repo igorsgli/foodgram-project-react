@@ -78,7 +78,7 @@ class CustomUserViewSet(UserViewSet):
             'user': self.request.user.id,
             'author': author.id
         }
-        if self.request.method ==    'POST':
+        if self.request.method == 'POST':
             subscription_serializer = SubscriptionSerializer(data=kwargs)
             subscription_serializer.is_valid(raise_exception=True)
             subscription_serializer.save()
