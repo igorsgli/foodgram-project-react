@@ -180,12 +180,6 @@ class Common(models.Model):
 
     class Meta:
         abstract = True
-        constraints = [
-            models.UniqueConstraint(
-                fields=['user', 'recipe'],
-                name=None
-            )
-        ]
 
     def __str__(self):
         return f"{'%(class)s'}: {self.recipe} у {self.user}"
@@ -196,6 +190,7 @@ class Favorite(Common):
         default_related_name = 'favorites'
         constraints = [
             models.UniqueConstraint(
+                fields=['user', 'recipe'],
                 name='unique_favorite_user_recipe'
             )
         ]
@@ -208,6 +203,7 @@ class ShoppingCart(Common):
         default_related_name = 'shoppingcarts'
         constraints = [
             models.UniqueConstraint(
+                fields=['user', 'recipe'],
                 name='unique_shoppingcart_user_recipe'
             )
         ]
