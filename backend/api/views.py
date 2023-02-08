@@ -206,4 +206,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ).annotate(
             total=Sum('amount')
         ).order_by('ingredient__name')
-        return self.save_file(items)
+        # return self.save_file(items)
+        text = '\n'.join([
+            f"{item['ingredient__name']} "
+            f"({item['ingredient__measurement_unit']}) - {item['total']}"
+            for item in items
+        ])
+        filename = 'shoping_cart.txt'
+        response = HttpResponse(text, content_type='text/plain')
+        # print(f'attachment; filename={filename}')
+        response['Content-Disposition'] = f'attachment; filename={filename}'
+        return response
