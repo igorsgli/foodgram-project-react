@@ -195,7 +195,7 @@ class Favorite(Common):
         default_related_name = 'favorites'
         constraints = [
             models.UniqueConstraint(
-                name='unique_favorite_user_recipe' 
+                name='unique_favorite_user_recipe'
             )
         ]
         verbose_name = 'Избранное'
@@ -207,7 +207,7 @@ class ShoppingCart(Common):
         default_related_name = 'shoppingcarts'
         constraints = [
             models.UniqueConstraint(
-                name='unique_shoppingcart_user_recipe' 
+                name='unique_shoppingcart_user_recipe'
             )
         ]
         verbose_name = 'Список покупок'
