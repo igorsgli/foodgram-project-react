@@ -201,7 +201,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         items = RecipeIngredient.objects.select_related(
             'recipe', 'ingredient'
         ).filter(
-            recipe__shoppingcart__user=request.user
+            recipe__shoppingcarts__user=request.user
         ).values(
             'ingredient__name', 'ingredient__measurement_unit'
         ).annotate(
