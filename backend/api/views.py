@@ -191,7 +191,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ])
         filename = 'shoping_cart.txt'
         response = HttpResponse(text, content_type='text/plain')
-        response['Content-Disposition'] = f'attachment; filename={filename}' % filename
+        print(f'attachment; filename={filename}')
+        response['Content-Disposition'] = f'attachment; filename={filename}'
         return response
 
     @action(methods=['get'], detail=False)
