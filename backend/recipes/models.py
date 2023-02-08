@@ -180,11 +180,9 @@ class Common(models.Model):
 
     class Meta:
         abstract = True
-        default_related_name = '%(model_name)ss'
         constraints = [
             models.UniqueConstraint(
-                fields=['user', 'recipe'],
-                name=None
+                fields=['user', 'recipe']
             )
         ]
 
@@ -194,11 +192,23 @@ class Common(models.Model):
 
 class Favorite(Common):
     class Meta(Common.Meta):
-        verbose_name = 'Избранное',
+        default_related_name = 'favorites'
+        constraints = [
+            models.UniqueConstraint(
+                name='unique_favorite_user_recipe' 
+            )
+        ]
+        verbose_name = 'Избранное'
         verbose_name_plural = 'Избранное'
 
 
 class ShoppingCart(Common):
     class Meta(Common.Meta):
+        default_related_name = 'shoppingcarts'
+        constraints = [
+            models.UniqueConstraint(
+                name='unique_shoppingcart_user_recipe' 
+            )
+        ]
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Список покупок'
