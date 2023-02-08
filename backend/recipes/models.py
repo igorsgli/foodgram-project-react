@@ -182,7 +182,8 @@ class Common(models.Model):
         abstract = True
         constraints = [
             models.UniqueConstraint(
-                fields=['user', 'recipe']
+                fields=['user', 'recipe'],
+                name=None
             )
         ]
 
@@ -195,8 +196,7 @@ class Favorite(Common):
         default_related_name = 'favorites'
         constraints = [
             models.UniqueConstraint(
-                name='unique_favorite_user_recipe',
-                name=None
+                name='unique_favorite_user_recipe'
             )
         ]
         verbose_name = 'Избранное'
